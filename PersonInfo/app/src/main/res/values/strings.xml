@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PersonInfo</string>
+    <string name="person_name_label">Name</string>
+    <string name="person_lastname_label">Last Name</string>
+    <string name="person_email_label">Email</string>
+    <string name="person_details_label">Details</string>
+    <string name="person_age_label">Age</string>
+    <string name="person_address_label">Address</string>
+    <string name="person_phone_number_label">Phone</string>
+</resources>
