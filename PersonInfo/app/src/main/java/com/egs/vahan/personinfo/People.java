@@ -1,7 +1,14 @@
 package com.egs.vahan.personinfo;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.util.Log;
+
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +29,16 @@ public class People {
     private Context mContext;
 
     private List<Person> mPersons;
+
+    private String doGetRequest(String url) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder().url(url).build();
+
+        Response response = client.newCall(request).execute();
+        Log.d("response: ", response.toString());
+        return response.body().string();
+    }
 
     public static People get(Context context) {
         if (sPeople == null) {
@@ -49,34 +66,19 @@ public class People {
     private People(Context context) {
         mContext = context;
         mPersons = new ArrayList<>();
-        try {
-            JSONObject jsonRootObject = new JSONObject(loadJSONFromAsset());
-            JSONArray jsonArray = jsonRootObject.optJSONArray("Persons");
 
-            for(int i=0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String name = jsonObject.optString("firstName").toString();
-                String lastName = jsonObject.optString("lastName").toString();
-                String address = jsonObject.optString("address").toString();
-                String email = jsonObject.optString("email").toString();
-                String phone = jsonObject.optString("phoneNumber").toString();
-                int age = jsonObject.optInt("age");
-                Person person = new Person();
-                person.setFirstname(name);
-                person.setLastName(lastName);
-                person.setAdress(address);
-                person.setEmail(email);
-                person.setAge(age);
-                person.setPhone(phone);
-                Log.d("Person name: ", name);
-                Log.d("Person lastname: ", lastName);
-                Log.d("Person address: ", address);
+        String stringUrl = "http://jsonplaceholder.typicode.com/users";
 
-                mPersons.add(person);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        ConnectivityManager connMgr = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new DownloadWebpageTask().execute(stringUrl);
+        } else {
+            // display error
         }
+
+
     }
 
     public List<Person> getPersons() {
@@ -91,4 +93,50 @@ public class People {
         }
         return null;
     }
+
+    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                return doGetRequest(strings[0]);
+            } catch (IOException e) {
+                return e.toString();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            try {
+                JSONArray jsonArray = new JSONArray(s);
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    String name = jsonObject.optString("name").toString();
+                    String lastName = jsonObject.optString("username").toString();
+                    String address = jsonObject.optString("address").toString();
+                    String email = jsonObject.optString("email").toString();
+                    String phone = jsonObject.optString("phone").toString();
+                    int age = 50;
+                    Person person = new Person();
+                    person.setFirstname(name);
+                    person.setLastName(lastName);
+                    person.setAdress(address);
+                    person.setEmail(email);
+                    person.setAge(age);
+                    person.setPhone(phone);
+                    Log.d("Person name: ", name);
+                    Log.d("Person lastname: ", lastName);
+                    Log.d("Person address: ", address);
+
+                    mPersons.add(person);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
 }
+
