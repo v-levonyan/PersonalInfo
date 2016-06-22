@@ -34,8 +34,9 @@ public class PersonListFragment extends Fragment {
 
     private RecyclerView mPersonRecyclerView;
     private PersonAdapter mAdapter;
-    private List<Person> mPersons;
     private People mPeople;
+    private String networkError;
+    private TextView mErrorTextView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,7 +52,7 @@ public class PersonListFragment extends Fragment {
         if (networkInfo != null && networkInfo.isConnected()) {
             new RetrieveUserInfoFromNet().execute(stringUrl);
         } else {
-            // display error
+            networkError = "Unable to connect";
         }
     }
 
@@ -61,6 +62,11 @@ public class PersonListFragment extends Fragment {
 
         mPersonRecyclerView = (RecyclerView) view.findViewById(R.id.person_recycler_view);
         mPersonRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        if (networkError != null) {
+            mErrorTextView = (TextView) container.findViewById(R.id.error_text);
+            mErrorTextView.setText(networkError);
+        }
 
         return view;
     }
