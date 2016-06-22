@@ -72,9 +72,8 @@ public class People {
         return null;
     }
 
-
-    public void add(Person person) {
-        mPersons.add(person);
+    public void setPersons(List<Person> persons) {
+        mPersons = persons;
     }
 }
 

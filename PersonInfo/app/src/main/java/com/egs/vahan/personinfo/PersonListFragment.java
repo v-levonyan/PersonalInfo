@@ -6,7 +6,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -50,7 +49,7 @@ public class PersonListFragment extends Fragment {
                 getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            new DownloadWebpageTask().execute(stringUrl);
+            new RetrieveUserInfoFromNet().execute(stringUrl);
         } else {
             // display error
         }
@@ -127,26 +126,26 @@ public class PersonListFragment extends Fragment {
         }
     }
 
-    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
+    private class RetrieveUserInfoFromNet extends AsyncTask<String, Void, List<Person>> {
         @Override
-        protected String doInBackground(String... strings) {
+        protected List<Person> doInBackground(String... strings) {
             try {
-                return doGetRequest(strings[0]);
+                return fetchItems(doGetRequest(strings[0]));
             } catch (IOException e) {
-                return e.toString();
+                return null;
             }
         }
 
-
         @Override
-        protected void onPostExecute(String s) {
-            fetchItems(s);
+        protected void onPostExecute(List<Person> persons) {
+            mPeople.setPersons(persons);
             updateUI();
         }
 
     }
 
-    private void fetchItems(String jsonString) {
+    private List<Person> fetchItems(String jsonString) {
+        List<Person> persons = new ArrayList<>();
         try {
             JSONArray jsonArray = new JSONArray(jsonString);
 
@@ -169,11 +168,12 @@ public class PersonListFragment extends Fragment {
                 Log.d("Person lastname: ", lastName);
                 Log.d("Person address: ", address);
 
-                mPeople.add(person);
+                persons.add(person);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return persons;
     }
 
     private String doGetRequest(String url) throws IOException {
