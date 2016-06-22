@@ -1,15 +1,31 @@
 package com.egs.vahan.personinfo;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +35,26 @@ public class PersonListFragment extends Fragment {
 
     private RecyclerView mPersonRecyclerView;
     private PersonAdapter mAdapter;
+    private List<Person> mPersons;
+    private People mPeople;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        mPeople = People.get(getActivity());
+//        mPersons = new ArrayList<>();
+        String stringUrl = "http://jsonplaceholder.typicode.com/users";
+
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new DownloadWebpageTask().execute(stringUrl);
+        } else {
+            // display error
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,17 +63,14 @@ public class PersonListFragment extends Fragment {
         mPersonRecyclerView = (RecyclerView) view.findViewById(R.id.person_recycler_view);
         mPersonRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        updateUI();
-
         return view;
     }
 
     private void updateUI() {
-        People people = People.get(getActivity());
-        List<Person> persons = people.getPersons();
-
-        mAdapter = new PersonAdapter(persons);
-        mPersonRecyclerView.setAdapter(mAdapter);
+        if (isAdded()) {
+            mAdapter = new PersonAdapter(mPeople.getPersons());
+            mPersonRecyclerView.setAdapter(mAdapter);
+        }
     }
 
     private class PersonHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -92,5 +125,64 @@ public class PersonListFragment extends Fragment {
         public int getItemCount() {
             return mPersons.size();
         }
+    }
+
+    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                return doGetRequest(strings[0]);
+            } catch (IOException e) {
+                return e.toString();
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            fetchItems(s);
+            updateUI();
+        }
+
+    }
+
+    private void fetchItems(String jsonString) {
+        try {
+            JSONArray jsonArray = new JSONArray(jsonString);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String name = jsonObject.optString("name").toString();
+                String lastName = jsonObject.optString("username").toString();
+                String address = jsonObject.optString("address").toString();
+                String email = jsonObject.optString("email").toString();
+                String phone = jsonObject.optString("phone").toString();
+                int age = 50;
+                Person person = new Person();
+                person.setFirstname(name);
+                person.setLastName(lastName);
+                person.setAdress(address);
+                person.setEmail(email);
+                person.setAge(age);
+                person.setPhone(phone);
+                Log.d("Person name: ", name);
+                Log.d("Person lastname: ", lastName);
+                Log.d("Person address: ", address);
+
+                mPeople.add(person);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String doGetRequest(String url) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder().url(url).build();
+
+        Response response = client.newCall(request).execute();
+        Log.d("response: ", response.toString());
+        return response.body().string();
     }
 }
