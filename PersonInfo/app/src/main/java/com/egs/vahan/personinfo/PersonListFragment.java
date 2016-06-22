@@ -11,6 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -35,15 +38,10 @@ public class PersonListFragment extends Fragment {
     private RecyclerView mPersonRecyclerView;
     private PersonAdapter mAdapter;
     private People mPeople;
-    private String networkError;
     private TextView mErrorTextView;
+    private boolean isConnected = false;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        mPeople = People.get(getActivity());
-//        mPersons = new ArrayList<>();
+    private boolean connectToNetwork() {
         String stringUrl = "http://jsonplaceholder.typicode.com/users";
 
         ConnectivityManager connMgr = (ConnectivityManager)
@@ -51,9 +49,23 @@ public class PersonListFragment extends Fragment {
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             new RetrieveUserInfoFromNet().execute(stringUrl);
+            return true;
         } else {
-            networkError = "Unable to connect";
+            return false;
         }
+    }
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        setRetainInstance(true);
+        mPeople = People.get(getActivity());
+//        mPersons = new ArrayList<>();
+
+        isConnected = connectToNetwork();
+
     }
 
     @Override
@@ -62,13 +74,35 @@ public class PersonListFragment extends Fragment {
 
         mPersonRecyclerView = (RecyclerView) view.findViewById(R.id.person_recycler_view);
         mPersonRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mErrorTextView = (TextView) container.findViewById(R.id.error_text_id);
 
-        if (networkError != null) {
-            mErrorTextView = (TextView) container.findViewById(R.id.error_text);
-            mErrorTextView.setText(networkError);
+        if (!isConnected) {
+            mErrorTextView.setVisibility(View.VISIBLE);
         }
-
         return view;
+    }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        updateUI();
+//    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.person_list_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_reload:
+                connectToNetwork();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void updateUI() {
@@ -145,6 +179,7 @@ public class PersonListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Person> persons) {
             mPeople.setPersons(persons);
+            mErrorTextView.setVisibility(View.INVISIBLE);
             updateUI();
         }
 

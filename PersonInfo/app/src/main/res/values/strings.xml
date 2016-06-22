@@ -7,4 +7,6 @@
     <string name="person_age_label">Age</string>
     <string name="person_address_label">Address</string>
     <string name="person_phone_number_label">Phone</string>
+    <string name="reload">Reload</string>
+    <string name="error_text">Unable to connect</string>
 </resources>
