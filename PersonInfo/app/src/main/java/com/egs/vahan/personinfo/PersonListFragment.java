@@ -86,14 +86,10 @@ public class PersonListFragment extends Fragment {
         if (!isConnected) {
             mErrorTextView.setVisibility(View.VISIBLE);
         }
+        updateUI();
         return view;
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        updateUI();
-//    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -220,7 +216,7 @@ public class PersonListFragment extends Fragment {
                     persons.add(person);
                     publishProgress((int) ((i / (float) jsonArray.length()) * 100));
 
-                    if(isCancelled()) {
+                    if (isCancelled()) {
                         break;
                     }
                 }
@@ -231,7 +227,6 @@ public class PersonListFragment extends Fragment {
         }
 
     }
-
 
 
     //Private methods
