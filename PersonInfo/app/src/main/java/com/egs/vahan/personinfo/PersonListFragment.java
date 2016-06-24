@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -67,10 +66,7 @@ public class PersonListFragment extends Fragment {
         setHasOptionsMenu(true);
         setRetainInstance(true);
         mPeople = People.get(getActivity());
-//        mPersons = new ArrayList<>();
-
         isConnected = connectToNetwork();
-
     }
 
     @Override
@@ -83,10 +79,11 @@ public class PersonListFragment extends Fragment {
         mProgressBar = (ProgressBar) container.findViewById(R.id.progress_bar_id);
         mProgressBarLayout = (LinearLayout) container.findViewById(R.id.progress_bar_layout);
 
-        if (!isConnected) {
+        if (!isConnected && mPeople.isEmpty()) {
             mErrorTextView.setVisibility(View.VISIBLE);
+        } else {
+            updateUI();
         }
-        updateUI();
         return view;
     }
 
@@ -127,7 +124,7 @@ public class PersonListFragment extends Fragment {
 
         public void bindPerson(Person person) {
             mPerson = person;
-            mNameTextView.setText(mPerson.getFirstname());
+            mNameTextView.setText(mPerson.getName());
             mLastNameTextView.setText(mPerson.getEmail());
         }
 
@@ -184,7 +181,7 @@ public class PersonListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Person> persons) {
             mProgressBarLayout.setVisibility(View.INVISIBLE);
-            mPeople.setPersons(persons);
+            mPeople.loadPersonsToDb(persons);
             mErrorTextView.setVisibility(View.INVISIBLE);
             updateUI();
         }
@@ -243,7 +240,8 @@ public class PersonListFragment extends Fragment {
 
     private void updateUI() {
         if (isAdded()) {
-            mAdapter = new PersonAdapter(mPeople.getPersons());
+            List<Person> persons = mPeople.getPersons();
+            mAdapter = new PersonAdapter(persons);
             mPersonRecyclerView.setAdapter(mAdapter);
         }
     }

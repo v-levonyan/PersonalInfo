@@ -18,15 +18,18 @@ public class Person {
 
 
     public Person() {
-
-        mId = UUID.randomUUID();
+        this(UUID.randomUUID());
     }
 
-    public String getFirstname() {
+    public Person(UUID id) {
+        mId = id;
+    }
+
+    public String getName() {
         return mFirstname;
     }
 
-    public String getLastName() {
+    public String getUserName() {
         return mLastName;
     }
 

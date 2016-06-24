@@ -43,10 +43,10 @@ public class PersonFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_person, container, false);
 
         mNameField = (TextView) v.findViewById(R.id.person_name);
-        mNameField.setText(mPerson.getFirstname());
+        mNameField.setText(mPerson.getName());
 
         mLastNameField = (TextView) v.findViewById(R.id.person_lastname);
-        mLastNameField.setText(mPerson.getLastName());
+        mLastNameField.setText(mPerson.getUserName());
 
         mEmailField = (TextView) v.findViewById(R.id.person_email);
         mEmailField.setText(mPerson.getEmail());
