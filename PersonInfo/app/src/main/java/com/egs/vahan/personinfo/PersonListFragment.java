@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
@@ -40,7 +41,6 @@ public class PersonListFragment extends Fragment {
 
     private RecyclerView mPersonRecyclerView;
     private PersonAdapter mAdapter;
-    private People mPeople;
     private TextView mErrorTextView;
     private ProgressBar mProgressBar;
     private LinearLayout mProgressBarLayout;
@@ -66,11 +66,7 @@ public class PersonListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         setRetainInstance(true);
-        mPeople = People.get(getActivity());
-//        mPersons = new ArrayList<>();
-
         isConnected = connectToNetwork();
-
     }
 
     @Override
@@ -83,10 +79,11 @@ public class PersonListFragment extends Fragment {
         mProgressBar = (ProgressBar) container.findViewById(R.id.progress_bar_id);
         mProgressBarLayout = (LinearLayout) container.findViewById(R.id.progress_bar_layout);
 
-        if (!isConnected) {
+        updateUI();
+        if (!isConnected && People.get(getActivity()).isEmpty()) {
             mErrorTextView.setVisibility(View.VISIBLE);
         }
-        updateUI();
+
         return view;
     }
 
@@ -163,6 +160,10 @@ public class PersonListFragment extends Fragment {
         public int getItemCount() {
             return mPersons.size();
         }
+
+        public void setPersons(List<Person> persons) {
+            mPersons = persons;
+        }
     }
 
     private class RetrieveUserInfoFromNet extends AsyncTask<String, Integer, List<Person>> {
@@ -184,7 +185,7 @@ public class PersonListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Person> persons) {
             mProgressBarLayout.setVisibility(View.INVISIBLE);
-            mPeople.setPersons(persons);
+
             mErrorTextView.setVisibility(View.INVISIBLE);
             updateUI();
         }
@@ -201,18 +202,13 @@ public class PersonListFragment extends Fragment {
                     String address = jsonObject.optString("address").toString();
                     String email = jsonObject.optString("email").toString();
                     String phone = jsonObject.optString("phone").toString();
-                    int age = 50;
                     Person person = new Person();
                     person.setFirstname(name);
                     person.setLastName(lastName);
                     person.setAdress(address);
                     person.setEmail(email);
-                    person.setAge(age);
                     person.setPhone(phone);
-                    Log.d("Person name: ", name);
-                    Log.d("Person lastname: ", lastName);
-                    Log.d("Person address: ", address);
-
+                    People.get(getActivity()).addPerson(person);
                     persons.add(person);
                     publishProgress((int) ((i / (float) jsonArray.length()) * 100));
 
@@ -243,8 +239,18 @@ public class PersonListFragment extends Fragment {
 
     private void updateUI() {
         if (isAdded()) {
-            mAdapter = new PersonAdapter(mPeople.getPersons());
+            List<Person> persons = People.get(getActivity()).getPersonsFromDb();
+            People.get(getActivity()).setPersons(persons);
+            mAdapter = new PersonAdapter(persons);
             mPersonRecyclerView.setAdapter(mAdapter);
+            updateSubtitle();
         }
+    }
+
+    private void updateSubtitle() {
+        int personCount = People.get(getActivity()).getCount();
+        String subtitle = getString(R.string.subtitle_format, personCount);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setSubtitle(subtitle);
     }
 }
