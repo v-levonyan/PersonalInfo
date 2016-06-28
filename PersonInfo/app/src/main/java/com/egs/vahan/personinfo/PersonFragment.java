@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.UUID;
 
 public class PersonFragment extends Fragment {
 
@@ -18,13 +17,12 @@ public class PersonFragment extends Fragment {
     private TextView mNameField;
     private TextView mLastNameField;
     private TextView mEmailField;
-    private TextView mAgeField;
     private TextView mAddressField;
     private TextView mPhoneField;
 
-    public static PersonFragment newInstance(UUID personId) {
+    public static PersonFragment newInstance(int personId) {
         Bundle args = new Bundle();
-        args.putSerializable(ARG_PERSON_ID, personId);
+        args.putInt(ARG_PERSON_ID, personId);
 
         PersonFragment fragment = new PersonFragment();
         fragment.setArguments(args);
@@ -34,7 +32,7 @@ public class PersonFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UUID personId = (UUID) getArguments().getSerializable(ARG_PERSON_ID);
+        int personId = getArguments().getInt(ARG_PERSON_ID);
         mPerson = People.get(getActivity()).getPerson(personId);
     }
 
@@ -53,9 +51,6 @@ public class PersonFragment extends Fragment {
 
         mAddressField = (TextView) v.findViewById(R.id.person_address);
         mAddressField.setText(mPerson.getAdress());
-
-        mAgeField = (TextView) v.findViewById(R.id.person_age);
-       // mAgeField.setText(Integer.toString(mPerson.getAge()));
 
         mPhoneField = (TextView) v.findViewById(R.id.person_phone_number);
         mPhoneField.setText(mPerson.getPhone());

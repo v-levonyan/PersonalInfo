@@ -1,29 +1,18 @@
 package com.egs.vahan.personinfo;
 
-import java.util.UUID;
 
 /**
  * Created by vahan on 6/20/16.
  */
 public class Person {
 
-    private UUID mId;
+    private int mId;
     private String mFirstname;
     private String mLastName;
-    private int mAge;
     private String mAdress;
     private String mEmail;
     private String mPhone;
 
-
-
-    public Person() {
-        this(UUID.randomUUID());
-    }
-
-    public Person(UUID id) {
-        mId = id;
-    }
 
     public String getFirstname() {
         return mFirstname;
@@ -33,16 +22,16 @@ public class Person {
         return mLastName;
     }
 
-    public int getAge() {
-        return mAge;
-    }
-
     public String getAdress() {
         return mAdress;
     }
 
-    public UUID getId() {
+    public int getId() {
         return mId;
+    }
+
+    public void setId(int id) {
+        mId = id;
     }
 
     public void setFirstname(String firstname) {
@@ -51,10 +40,6 @@ public class Person {
 
     public void setLastName(String lastName) {
         mLastName = lastName;
-    }
-
-    public void setAge(int age) {
-        mAge = age;
     }
 
     public void setAdress(String adress) {

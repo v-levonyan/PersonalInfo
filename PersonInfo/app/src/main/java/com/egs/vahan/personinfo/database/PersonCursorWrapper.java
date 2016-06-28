@@ -6,7 +6,6 @@ import android.database.CursorWrapper;
 import com.egs.vahan.personinfo.Person;
 import com.egs.vahan.personinfo.database.PersonDbSchema.PersonTable;
 
-import java.util.UUID;
 
 /**
  * Created by vahanl on 6/24/16.
@@ -17,14 +16,15 @@ public class PersonCursorWrapper extends CursorWrapper {
     }
 
     public Person getPerson() {
-        String uuidString = getString(getColumnIndex(PersonTable.Cols.UUID));
+        String idString = getString(getColumnIndex(PersonTable.Cols.ID));
         String name = getString(getColumnIndex(PersonTable.Cols.NAME));
         String phone = getString(getColumnIndex(PersonTable.Cols.PHONE));
         String address = getString(getColumnIndex(PersonTable.Cols.ADDRESS));
         String email = getString(getColumnIndex(PersonTable.Cols.EMAIL));
         String username = getString(getColumnIndex(PersonTable.Cols.USERNAME));
 
-        Person person = new Person(UUID.fromString(uuidString));
+        Person person = new Person();
+        person.setId(Integer.parseInt(idString));
         person.setAdress(address);
         person.setLastName(username);
         person.setFirstname(name);

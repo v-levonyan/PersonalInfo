@@ -166,14 +166,15 @@ public class PersonListFragment extends Fragment {
         }
     }
 
-    private class RetrieveUserInfoFromNet extends AsyncTask<String, Integer, List<Person>> {
+    private class RetrieveUserInfoFromNet extends AsyncTask<String, Integer, Void> {
         @Override
-        protected List<Person> doInBackground(String... strings) {
+        protected Void doInBackground(String... strings) {
             try {
-                return fetchItems(doGetRequest(strings[0]));
+                 fetchItems(doGetRequest(strings[0]));
             } catch (IOException e) {
                 return null;
             }
+            return null;
         }
 
         @Override
@@ -183,33 +184,38 @@ public class PersonListFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<Person> persons) {
+        protected void onPostExecute(Void args) {
             mProgressBarLayout.setVisibility(View.INVISIBLE);
 
             mErrorTextView.setVisibility(View.INVISIBLE);
             updateUI();
         }
 
-        private List<Person> fetchItems(String jsonString) {
-            List<Person> persons = new ArrayList<>();
+        private void fetchItems(String jsonString) {
+            People people = People.get(getActivity());
             try {
                 JSONArray jsonArray = new JSONArray(jsonString);
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    int id = jsonObject.optInt("id");
                     String name = jsonObject.optString("name").toString();
                     String lastName = jsonObject.optString("username").toString();
                     String address = jsonObject.optString("address").toString();
                     String email = jsonObject.optString("email").toString();
                     String phone = jsonObject.optString("phone").toString();
                     Person person = new Person();
+                    person.setId(id);
                     person.setFirstname(name);
                     person.setLastName(lastName);
                     person.setAdress(address);
                     person.setEmail(email);
                     person.setPhone(phone);
-                    People.get(getActivity()).addPerson(person);
-                    persons.add(person);
+                    if (people.getPersonFromDb(id) == null) {
+                        people.addPerson(person);
+                    } else {
+                        people.updatePerson(person);
+                    }
                     publishProgress((int) ((i / (float) jsonArray.length()) * 100));
 
                     if (isCancelled()) {
@@ -219,7 +225,6 @@ public class PersonListFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return persons;
         }
 
     }

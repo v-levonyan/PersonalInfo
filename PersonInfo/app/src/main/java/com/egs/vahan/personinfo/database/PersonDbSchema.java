@@ -8,7 +8,7 @@ public class PersonDbSchema {
         public static final String NAME = "persons";
 
         public static final class Cols {
-            public static final String UUID = "uuid";
+            public static final String ID = "id";
             public static final String NAME = "name";
             public static final String USERNAME = "username";
             public static final String ADDRESS = "address";

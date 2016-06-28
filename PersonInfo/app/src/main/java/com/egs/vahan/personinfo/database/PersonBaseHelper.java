@@ -20,7 +20,7 @@ public class PersonBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + PersonTable.NAME + "(" +
-                PersonTable.Cols.UUID + ", " +
+                PersonTable.Cols.ID + ", " +
                 PersonTable.Cols.NAME + ", " +
                 PersonTable.Cols.USERNAME + ", " +
                 PersonTable.Cols.EMAIL + ", " +

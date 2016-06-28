@@ -4,28 +4,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.util.Log;
 
 import com.egs.vahan.personinfo.database.PersonBaseHelper;
 import com.egs.vahan.personinfo.database.PersonCursorWrapper;
-import com.egs.vahan.personinfo.database.PersonDbSchema;
 import com.egs.vahan.personinfo.database.PersonDbSchema.PersonTable;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by vahan on 6/20/16.
@@ -76,9 +63,9 @@ public class People {
         return mPersons.size();
     }
 
-    public Person getPerson(UUID id) {
+    public Person getPerson(int id) {
         for (Person person : mPersons) {
-            if (person.getId().equals(id)) {
+            if (person.getId() == id) {
                 return person;
             }
         }
@@ -129,7 +116,7 @@ public class People {
 
     private static ContentValues getContentValues(Person person) {
         ContentValues values = new ContentValues();
-        values.put(PersonTable.Cols.UUID, person.getId().toString());
+        values.put(PersonTable.Cols.ID, Integer.toString(person.getId()));
         values.put(PersonTable.Cols.NAME, person.getFirstname());
         values.put(PersonTable.Cols.USERNAME, person.getLastName());
         values.put(PersonTable.Cols.ADDRESS, person.getAdress());
@@ -137,6 +124,30 @@ public class People {
         values.put(PersonTable.Cols.PHONE, person.getPhone());
 
         return values;
+    }
+
+    public void updatePerson(Person person) {
+        int id = person.getId();
+        ContentValues values = getContentValues(person);
+        mDatabase.update(PersonTable.NAME, values,
+                PersonTable.Cols.ID + " = ?",
+                new String[] {Integer.toString(id)});
+    }
+
+    public Person getPersonFromDb(int id) {
+        PersonCursorWrapper cursor = queryPersons(
+                PersonTable.Cols.ID + " = ?",
+                new String[] { Integer.toString(id) }
+        );
+        try {
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+            cursor.moveToFirst();
+            return cursor.getPerson();
+        } finally {
+            cursor.close();
+        }
     }
 
 
