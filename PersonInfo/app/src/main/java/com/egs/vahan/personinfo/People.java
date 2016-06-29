@@ -22,7 +22,6 @@ public class People {
     private static People sPeople;
     private Context mContext;
 
-    private List<Person> mPersons;
     private SQLiteDatabase mDatabase;
 
 
@@ -51,35 +50,18 @@ public class People {
 
     private People(Context context) {
         mContext = context.getApplicationContext();
-        mPersons = new ArrayList<>();
         mDatabase = new PersonBaseHelper(mContext).getWritableDatabase();
     }
 
-    public List<Person> getPersons() {
-        return mPersons;
-    }
 
     public int getCount() {
-        return mPersons.size();
-    }
-
-    public Person getPerson(int id) {
-        for (Person person : mPersons) {
-            if (person.getId() == id) {
-                return person;
-            }
-        }
-        return null;
+        return getPersonsFromDb().size();
     }
 
     public boolean isEmpty() {
-        return getPersons().isEmpty();
+        return getPersonsFromDb().isEmpty();
     }
 
-
-    public void setPersons(List<Person> persons) {
-        mPersons = persons;
-    }
 
     public List<Person> getPersonsFromDb() {
         List<Person> persons = new ArrayList<>();

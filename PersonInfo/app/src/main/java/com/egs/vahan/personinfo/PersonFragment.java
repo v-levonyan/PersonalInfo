@@ -33,7 +33,7 @@ public class PersonFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int personId = getArguments().getInt(ARG_PERSON_ID);
-        mPerson = People.get(getActivity()).getPerson(personId);
+        mPerson = People.get(getActivity()).getPersonFromDb(personId);
     }
 
     @Override

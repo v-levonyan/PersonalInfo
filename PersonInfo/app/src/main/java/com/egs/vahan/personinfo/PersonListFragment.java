@@ -245,7 +245,6 @@ public class PersonListFragment extends Fragment {
     private void updateUI() {
         if (isAdded()) {
             List<Person> persons = People.get(getActivity()).getPersonsFromDb();
-            People.get(getActivity()).setPersons(persons);
             mAdapter = new PersonAdapter(persons);
             mPersonRecyclerView.setAdapter(mAdapter);
             updateSubtitle();
