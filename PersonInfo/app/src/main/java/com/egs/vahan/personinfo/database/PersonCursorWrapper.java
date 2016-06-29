@@ -2,6 +2,7 @@ package com.egs.vahan.personinfo.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
+import android.util.Log;
 
 import com.egs.vahan.personinfo.Person;
 import com.egs.vahan.personinfo.database.PersonDbSchema.PersonTable;
@@ -25,11 +26,14 @@ public class PersonCursorWrapper extends CursorWrapper {
 
         Person person = new Person();
         person.setId(Integer.parseInt(idString));
-        person.setAdress(address);
+        String normalAddress = address.replaceAll("[{}\"]", " ");
+        person.setAdress(normalAddress);
+        Log.d("Adress", normalAddress);
         person.setLastName(username);
         person.setFirstname(name);
         person.setPhone(phone);
         person.setEmail(email);
         return person;
     }
+
 }
